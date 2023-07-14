@@ -8,7 +8,7 @@
         "OutputPath": "$.Payload",
         "Parameters": {
           "Payload.$": "$",
-          "FunctionName": "arn:aws:lambda:us-east-1:865522842129:function:SFTeste2:$LATEST"
+          "FunctionName": "arn:aws:lambda:us-east-1:AWS_ACCOUNT_ID:function:SFTeste2:$LATEST"
         },
         "Retry": [
           {

@@ -7,7 +7,7 @@
         "Resource": "arn:aws:states:::lambda:invoke",
         "OutputPath": "$.Payload",
         "Parameters": {
-          "FunctionName": "arn:aws:lambda:us-east-1:865522842129:function:SFTeste:$LATEST",
+          "FunctionName": "arn:aws:lambda:us-east-1:AWS_ACCOUNT_ID:function:SFTeste:$LATEST",
           "Payload.$": "$"
         },
         "Retry": [
@@ -29,7 +29,7 @@
         "Type": "Task",
         "Resource": "arn:aws:states:::states:startExecution.sync:2",
         "Parameters": {
-          "StateMachineArn": "arn:aws:states:us-east-1:865522842129:stateMachine:TesteBialog2",
+          "StateMachineArn": "arn:aws:states:us-east-1:AWS_ACCOUNT_ID:stateMachine:TesteBialog2",
           "Input.$": "$"
         },
         "OutputPath": "$.Output",
