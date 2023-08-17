@@ -1,0 +1,66 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  nested-stepfunctions-sam
+
+  Sample SAM Template for nested-stepfunctions-sam
+
+Resources:
+
+  WorkflowParent:
+    Type: AWS::Serverless::StateMachine 
+    Properties:
+      DefinitionUri: statemachine/parent.asl.json
+      DefinitionSubstitutions:
+        Lambda1FunctionArn: !GetAtt Lambda1.Arn
+        WorkflowChildArn: !GetAtt WorkflowChild.Arn
+      Policies:
+        - LambdaInvokePolicy:
+            FunctionName: !Ref Lambda1
+        #Permissões necessárias para invocar a state machine filha
+        - StepFunctionsExecutionPolicy:
+            StateMachineName: !GetAtt WorkflowChild.Name
+        - Statement:
+          - Sid: EventBridgePolicy
+            Effect: Allow
+            Action:
+              - events:PutTargets
+              - events:PutRule
+              - events:DescribeRule
+            Resource: arn:aws:events:[[region]]:[[aws account id]]:rule/StepFunctionsGetEventsForStepFunctionsExecutionRule
+
+  WorkflowChild:
+    Type: AWS::Serverless::StateMachine 
+    Properties:
+      DefinitionUri: statemachine/child.asl.json
+      DefinitionSubstitutions:
+        Lambda2FunctionArn: !GetAtt Lambda2.Arn
+      Policies:
+        - LambdaInvokePolicy:
+            FunctionName: !Ref Lambda2
+
+  Lambda1:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html
+    Properties:
+      CodeUri: functions/lambda1/
+      Handler: app.lambdaHandler
+      Runtime: nodejs18.x
+      Architectures:
+        - x86_64
+
+  Lambda2:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/lambda2/
+      Handler: app.lambdaHandler
+      Runtime: nodejs18.x
+      Architectures:
+        - x86_64
+
+Outputs:
+  WorkflowParentArn:
+    Value: !GetAtt WorkflowParent.Arn
+  Lambda1Arn:
+    Value: !GetAtt Lambda1.Arn
+  Lambda2Arn:
+    Value: !GetAtt Lambda1.Arn

@@ -1,0 +1,15 @@
+{
+    "Comment": "Teste Nested Workflow",
+    "StartAt": "Lambda2",
+    "States": {
+        "Lambda2": {
+            "Type": "Task",
+            "Resource": "${Lambda2FunctionArn}",
+            "Next": "Pass2"
+        },
+        "Pass2": {
+            "Type": "Pass",
+            "End": true
+        }
+    }
+}

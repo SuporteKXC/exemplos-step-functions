@@ -1,0 +1,25 @@
+{
+    "Comment": "Teste Nested Workflow",
+    "StartAt": "Lambda1",
+    "States": {
+        "Lambda1": {
+            "Type": "Task",
+            "Resource": "${Lambda1FunctionArn}",
+            "Next": "WorkflowChild"
+        },
+        "WorkflowChild": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::states:startExecution.sync:2",
+            "Parameters": {
+              "StateMachineArn": "${WorkflowChildArn}",
+              "Input.$": "$"
+            },
+            "OutputPath": "$.Output",
+            "Next": "Pass1"
+        },
+        "Pass1": {
+            "Type": "Pass",
+            "End": true
+        }
+    }
+}
