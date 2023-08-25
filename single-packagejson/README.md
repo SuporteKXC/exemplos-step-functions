@@ -1,4 +1,4 @@
-#package.json único
+# package.json único
 
 Nesse exemplo, existe um único package.json que é compartilhado por todas as funções.
 
