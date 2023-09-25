@@ -1,0 +1,89 @@
+service: flow1-service
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+  region: us-east-1
+  timeout: 60
+  deploymentMethod: direct
+
+custom:
+  notificationTopicArn:
+    Fn::ImportValue: NotificationTopicArn
+  hellostepfunc1Arn:
+    Fn::ImportValue: HelloStepFunc1Arn
+
+functions:
+  state2Function:
+    handler: index.handler
+    environment: 
+      NOTIFICATION_ARN: ${self:custom.notificationTopicArn}
+
+stepFunctions:
+  stateMachines:
+    hellostepfunc2:
+      name: HelloStepFunc2
+      role: 
+         Fn::GetAtt: [HelloStepFunc2Role, Arn]
+      definition: 
+        StartAt: Pass
+        States:
+          Pass:
+            Type: Pass
+            Next: Child
+          Child:
+            Type: Task
+            Resource: arn:aws:states:::states:startExecution.sync:2
+            Parameters:
+              StateMachineArn: ${self:custom.hellostepfunc1Arn}
+              "Input.$": "$"
+            OutputPath: "$.Output"
+            End: true
+
+plugins:
+  - serverless-offline
+  - serverless-step-functions
+
+resources:
+  Resources:
+    HelloStepFunc2Role:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  Fn::Sub: states.${AWS::Region}.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: dev-flow1-service-statemachine
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                  - states:StartExecution
+                  Resource:
+                  - "*"
+
+                - Effect: Allow
+                  Action:
+                  - states:DescribeExecution
+                  - states:StopExecution
+                  Resource: "*"
+
+                - Effect: Allow
+                  Action:
+                  - events:PutTargets
+                  - events:PutRule
+                  - events:DescribeRule
+                  Resource: arn:aws:events:us-east-1:865522842129:rule/StepFunctionsGetEventsForStepFunctionsExecutionRule
+
+  Outputs:
+    HelloStepFunc2Arn:
+      Value: 
+        Ref: HelloStepFunc2
+      Export:
+        Name: HelloStepFunc2Arn

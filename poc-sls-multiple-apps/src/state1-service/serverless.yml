@@ -1,0 +1,41 @@
+service: state1-service
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+  region: us-east-1
+  timeout: 60
+  deploymentMethod: direct
+
+custom:
+ notificationTopicArn:
+   Fn::ImportValue: NotificationTopicArn
+
+functions:
+  state1Function:
+    handler: index.handler
+    environment: 
+      NOTIFICATION_ARN: ${self:custom.notificationTopicArn}
+
+stepFunctions:
+  stateMachines:
+    hellostepfunc1:
+      name: HelloStepFunc1
+      definition: 
+        StartAt: Pass
+        States:
+          Pass:
+            Type: Pass
+            End: true
+
+plugins:
+  - serverless-offline
+  - serverless-step-functions
+
+resources:
+  Outputs:
+    HelloStepFunc1Arn:
+      Value: 
+        Ref: HelloStepFunc1
+      Export:
+        Name: HelloStepFunc1Arn
